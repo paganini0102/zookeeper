@@ -39,51 +39,52 @@ import org.slf4j.LoggerFactory;
  */
 class WatchManager {
     private static final Logger LOG = LoggerFactory.getLogger(WatchManager.class);
-
+    /** watcher表 */
     private final Map<String, Set<Watcher>> watchTable =
         new HashMap<String, Set<Watcher>>();
-
+    /** watcher到节点路径的映射 */
     private final Map<Watcher, Set<String>> watch2Paths =
         new HashMap<Watcher, Set<String>>();
 
     synchronized int size(){
         int result = 0;
-        for(Set<Watcher> watches : watchTable.values()) {
-            result += watches.size();
+        for(Set<Watcher> watches : watchTable.values()) {  // 遍历watchTable所有的值集合(HashSet<Watcher>集合)
+            result += watches.size(); // 每个集合大小累加
         }
         return result;
     }
 
     synchronized void addWatch(String path, Watcher watcher) {
+        // 根据路径获取对应的所有watcher
         Set<Watcher> list = watchTable.get(path);
-        if (list == null) {
+        if (list == null) { // 列表为空
             // don't waste memory if there are few watches on a node
             // rehash when the 4th entry is added, doubling size thereafter
             // seems like a good compromise
-            list = new HashSet<Watcher>(4);
-            watchTable.put(path, list);
+            list = new HashSet<Watcher>(4); // 新生成watcher集合
+            watchTable.put(path, list); // 存入watcher表
         }
-        list.add(watcher);
+        list.add(watcher); // 将watcher直接添加至watcher集合
 
-        Set<String> paths = watch2Paths.get(watcher);
+        Set<String> paths = watch2Paths.get(watcher); // 通过watcher获取对应的所有路径
         if (paths == null) {
             // cnxns typically have many watches, so use default cap here
-            paths = new HashSet<String>();
-            watch2Paths.put(watcher, paths);
+            paths = new HashSet<String>(); // 新生成hash集合
+            watch2Paths.put(watcher, paths); // 将watcher和对应的paths添加至映射中
         }
-        paths.add(path);
+        paths.add(path); // 将路径添加至paths集合
     }
 
     synchronized void removeWatcher(Watcher watcher) {
-        Set<String> paths = watch2Paths.remove(watcher);
-        if (paths == null) {
+        Set<String> paths = watch2Paths.remove(watcher); // 从wach2Paths中移除watcher，并返回watcher对应的path集合
+        if (paths == null) { // 集合为空，直接返回
             return;
         }
-        for (String p : paths) {
-            Set<Watcher> list = watchTable.get(p);
-            if (list != null) {
-                list.remove(watcher);
-                if (list.size() == 0) {
+        for (String p : paths) { // 遍历路径集合
+            Set<Watcher> list = watchTable.get(p); // 从watcher表中根据路径取出相应的watcher集合
+            if (list != null) { // 若集合不为空
+                list.remove(watcher); // 从list中移除该watcher
+                if (list.size() == 0) { // 移除后list为空，则从watch表中移出
                     watchTable.remove(p);
                 }
             }
@@ -96,10 +97,10 @@ class WatchManager {
 
     Set<Watcher> triggerWatch(String path, EventType type, Set<Watcher> supress) {
         WatchedEvent e = new WatchedEvent(type,
-                KeeperState.SyncConnected, path);
+                KeeperState.SyncConnected, path); // 根据事件类型、连接状态、节点路径创建WatchedEvent
         Set<Watcher> watchers;
         synchronized (this) {
-            watchers = watchTable.remove(path);
+            watchers = watchTable.remove(path); // 从watcher表中移除path，并返回其对应的watcher集合
             if (watchers == null || watchers.isEmpty()) {
                 if (LOG.isTraceEnabled()) {
                     ZooTrace.logTraceMessage(LOG,
@@ -109,14 +110,16 @@ class WatchManager {
                 return null;
             }
             for (Watcher w : watchers) {
+                // 根据watcher从watcher表中取出路径集合
                 Set<String> paths = watch2Paths.get(w);
                 if (paths != null) {
+                    // 则移除路径
                     paths.remove(path);
                 }
             }
         }
         for (Watcher w : watchers) {
-            if (supress != null && supress.contains(w)) {
+            if (supress != null && supress.contains(w)) { // supress不为空并且包含watcher，则跳过
                 continue;
             }
             w.process(e);
