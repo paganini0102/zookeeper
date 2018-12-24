@@ -89,9 +89,9 @@ import org.slf4j.LoggerFactory;
  */
 public class FileTxnLog implements TxnLog {
     private static final Logger LOG;
-
+    /** 预分配64M */
     static long preAllocSize =  65536 * 1024;
-
+    /** 魔术数字，默认为1514884167 */
     public final static int TXNLOG_MAGIC =
         ByteBuffer.wrap("ZKLG".getBytes()).getInt();
 
