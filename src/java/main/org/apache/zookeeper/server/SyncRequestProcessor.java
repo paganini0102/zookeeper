@@ -180,17 +180,23 @@ public class SyncRequestProcessor extends ZooKeeperCriticalThread implements
         LOG.info("SyncRequestProcessor exited!");
     }
 
+    /**
+     * 刷新到磁盘
+     * @param toFlush
+     * @throws IOException
+     * @throws RequestProcessorException
+     */
     private void flush(LinkedList<Request> toFlush)
         throws IOException, RequestProcessorException
     {
         if (toFlush.isEmpty())
             return;
 
-        zks.getZKDatabase().commit();
+        zks.getZKDatabase().commit(); // 提交至ZK数据库
         while (!toFlush.isEmpty()) {
             Request i = toFlush.remove();
             if (nextProcessor != null) {
-                nextProcessor.processRequest(i);
+                nextProcessor.processRequest(i); // 下个处理器开始处理请求
             }
         }
         if (nextProcessor != null && nextProcessor instanceof Flushable) {
