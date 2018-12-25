@@ -52,10 +52,11 @@ public abstract class ServerCnxn implements Stats, Watcher {
     // (aka owned by) this class
     final public static Object me = new Object();
     private static final Logger LOG = LoggerFactory.getLogger(ServerCnxn.class);
-    
+    /** 认证信息 */
     private Set<Id> authInfo = Collections.newSetFromMap(new ConcurrentHashMap<Id, Boolean>());
 
     /**
+     * 是否为旧的C客户端
      * If the client is of old version, we don't send r-o mode info to it.
      * The reason is that if we would, old C client doesn't read it, which
      * results in TCP RST packet, i.e. "connection reset by peer".
@@ -98,7 +99,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
     abstract void disableRecv();
 
     abstract void setSessionTimeout(int sessionTimeout);
-
+    /** Zookeeper的Sasl服务器 */
     protected ZooKeeperSaslServer zooKeeperSaslServer = null;
 
     protected static class CloseRequestException extends IOException {

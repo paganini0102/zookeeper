@@ -362,10 +362,10 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
         throws KeeperException, IOException, RequestProcessorException
     {
         request.setHdr(new TxnHeader(request.sessionId, request.cxid, zxid,
-                Time.currentWallTime(), type));
+                Time.currentWallTime(), type)); // 新生事务头
 
         switch (type) {
-            case OpCode.create:
+            case OpCode.create: // 创建节点操作
             case OpCode.create2:
             case OpCode.createTTL:
             case OpCode.createContainer: {
@@ -633,7 +633,7 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
     }
 
     private void pRequest2TxnCreate(int type, Request request, Record record, boolean deserialize) throws IOException, KeeperException {
-        if (deserialize) {
+        if (deserialize) { // 反序列化，将ByteBuffer转化为Record
             ByteBufferInputStream.byteBuffer2Record(request.request, record);
         }
 
@@ -657,16 +657,16 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
             data = createRequest.getData();
             ttl = -1;
         }
-        CreateMode createMode = CreateMode.fromFlag(flags);
+        CreateMode createMode = CreateMode.fromFlag(flags); // 获取创建模式
         validateCreateRequest(path, createMode, request, ttl);
         String parentPath = validatePathForCreate(path, request.sessionId);
 
-        List<ACL> listACL = fixupACL(path, request.authInfo, acl);
-        ChangeRecord parentRecord = getRecordForPath(parentPath);
+        List<ACL> listACL = fixupACL(path, request.authInfo, acl); // 检查ACL列表
+        ChangeRecord parentRecord = getRecordForPath(parentPath); // 获取父节点的Record的子节点版本号
 
         checkACL(zks, request.cnxn, parentRecord.acl, ZooDefs.Perms.CREATE, request.authInfo, path, listACL);
         int parentCVersion = parentRecord.stat.getCversion();
-        if (createMode.isSequential()) {
+        if (createMode.isSequential()) { // 顺序模式
             path = path + String.format(Locale.ENGLISH, "%010d", parentCVersion);
         }
         validatePath(path, request.sessionId);
@@ -793,7 +793,7 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
                 //Store off current pending change records in case we need to rollback
                 Map<String, ChangeRecord> pendingChanges = getPendingChanges(multiRequest); // 存储当前挂起的更改记录，以防我们需要回滚
 
-                for(Op op: multiRequest) {
+                for(Op op: multiRequest) { // 遍历请求
                     Record subrequest = op.toRequestRecord();
                     int type;
                     Record txn;
@@ -810,7 +810,7 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
                     /* Prep the request and convert to a Txn */
                     else {
                         try {
-                            pRequest2Txn(op.getType(), zxid, request, subrequest, false);
+                            pRequest2Txn(op.getType(), zxid, request, subrequest, false); // 将Request转化为Txn
                             type = request.getHdr().getType();
                             txn = request.getTxn();
                         } catch (KeeperException e) {

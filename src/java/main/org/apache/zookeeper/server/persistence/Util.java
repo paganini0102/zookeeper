@@ -209,9 +209,9 @@ public class Util {
      */
     public static long padLogFile(FileOutputStream f,long currentSize,
             long preAllocSize) throws IOException{
-        long position = f.getChannel().position();
-        if (position + 4096 >= currentSize) {
-            currentSize = currentSize + preAllocSize;
+        long position = f.getChannel().position(); // 获取位置
+        if (position + 4096 >= currentSize) { // 计算后是否大于当前大小
+            currentSize = currentSize + preAllocSize; // 重新设置当前大小，剩余部分填充0
             fill.position(0);
             f.getChannel().write(fill, currentSize-fill.remaining());
         }
