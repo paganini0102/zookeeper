@@ -146,16 +146,20 @@ public class FileSnap implements SnapShot {
      * @throws IOException
      */
     private List<File> findNValidSnapshots(int n) throws IOException {
-        List<File> files = Util.sortDataDir(snapDir.listFiles(),"snapshot", false);
+        List<File> files = Util.sortDataDir(snapDir.listFiles(),"snapshot", false); // 按照zxid对snapshot文件进行降序排序
         int count = 0;
         List<File> list = new ArrayList<File>();
-        for (File f : files) {
+        for (File f : files) { // 遍历snapshot文件
             // we should catch the exceptions
             // from the valid snapshot and continue
             // until we find a valid one
             try {
+                /**
+                 *  验证文件是否合法，在写snapshot文件时服务器宕机
+                 *  此时的snapshot文件非法;非snapshot文件也非法
+                 */
                 if (Util.isValidSnapshot(f)) {
-                    list.add(f);
+                    list.add(f); // 合法则添加
                     count++;
                     if (count == n) {
                         break;

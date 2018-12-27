@@ -96,17 +96,17 @@ public class MBeanRegistry {
         assert bean != null;
         String path = null;
         if (parent != null) {
-            path = mapBean2Path.get(parent);
-            assert path != null;
+            path = mapBean2Path.get(parent); // 通过parent从bean2Path中获取path
+            assert path != null; // 确保path不为空
         }
-        path = makeFullPath(path, parent);
+        path = makeFullPath(path, parent); // 补充为完整的路径
         if(bean.isHidden())
             return;
-        ObjectName oname = makeObjectName(path, bean);
+        ObjectName oname = makeObjectName(path, bean); // 使用路径来创建名字
         try {
             synchronized (LOCK) {
-                mBeanServer.registerMBean(bean, oname);
-                mapBean2Path.put(bean, path);
+                mBeanServer.registerMBean(bean, oname); // 注册Server
+                mapBean2Path.put(bean, path); // 将bean和对应path放入mapBean2Path
             }
         } catch (JMException e) {
             LOG.warn("Failed to register MBean " + bean.getName());

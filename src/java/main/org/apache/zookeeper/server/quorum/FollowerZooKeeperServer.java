@@ -81,9 +81,9 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
     LinkedBlockingQueue<Request> pendingTxns = new LinkedBlockingQueue<Request>();
 
     public void logRequest(TxnHeader hdr, Record txn) {
-        Request request = new Request(hdr.getClientId(), hdr.getCxid(), hdr.getType(), hdr, txn, hdr.getZxid());
-        if ((request.zxid & 0xffffffffL) != 0) {
-            pendingTxns.add(request);
+        Request request = new Request(hdr.getClientId(), hdr.getCxid(), hdr.getType(), hdr, txn, hdr.getZxid()); // 创建请求
+        if ((request.zxid & 0xffffffffL) != 0) { // zxid不为0，表示本服务器已经处理过请求
+            pendingTxns.add(request); // 则需要将该请求放入pendingTxns中
         }
         syncProcessor.processRequest(request);
     }
@@ -117,7 +117,7 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
             return;
         }
 
-        Request r = pendingSyncs.remove();
+        Request r = pendingSyncs.remove(); // 从待同步队列中移除队首请求
 		commitProcessor.commit(r);
     }
 

@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
     private ContainerManager containerManager;  // guarded by sync
 
-
+    /** 提交请求处理器 */
     CommitProcessor commitProcessor;
 
     PrepRequestProcessor prepRequestProcessor;
@@ -63,20 +63,20 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
 
     @Override
     protected void setupRequestProcessors() {
-        RequestProcessor finalProcessor = new FinalRequestProcessor(this);
-        RequestProcessor toBeAppliedProcessor = new Leader.ToBeAppliedRequestProcessor(finalProcessor, getLeader());
+        RequestProcessor finalProcessor = new FinalRequestProcessor(this); // 创建FinalRequestProcessor
+        RequestProcessor toBeAppliedProcessor = new Leader.ToBeAppliedRequestProcessor(finalProcessor, getLeader()); // 创建ToBeAppliedRequestProcessor
         commitProcessor = new CommitProcessor(toBeAppliedProcessor,
                 Long.toString(getServerId()), false,
-                getZooKeeperServerListener());
-        commitProcessor.start();
+                getZooKeeperServerListener()); // 创建CommitProcessor
+        commitProcessor.start(); // 启动CommitProcessor
         ProposalRequestProcessor proposalProcessor = new ProposalRequestProcessor(this,
-                commitProcessor);
-        proposalProcessor.initialize();
+                commitProcessor); // 创建ProposalRequestProcessor
+        proposalProcessor.initialize(); // 初始化ProposalProcessor
         prepRequestProcessor = new PrepRequestProcessor(this, proposalProcessor);
         prepRequestProcessor.start();
-        firstProcessor = new LeaderRequestProcessor(this, prepRequestProcessor);
+        firstProcessor = new LeaderRequestProcessor(this, prepRequestProcessor); // firstProcessor为PrepRequestProcessor
 
-        setupContainerManager();
+        setupContainerManager(); // 启动PrepRequestProcessor
     }
 
     private synchronized void setupContainerManager() {
@@ -154,8 +154,8 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
     protected void registerJMX() {
         // register with JMX
         try {
-            jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree());
-            MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
+            jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree()); // 创建DataTreeBean
+            MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean); // 进行注册
         } catch (Exception e) {
             LOG.warn("Failed to register with JMX", e);
             jmxDataTreeBean = null;
