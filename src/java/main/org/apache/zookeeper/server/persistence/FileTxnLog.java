@@ -221,8 +221,8 @@ public class FileTxnLog implements TxnLog {
            fos = new FileOutputStream(logFileWrite);
            logStream=new BufferedOutputStream(fos);
            oa = BinaryOutputArchive.getArchive(logStream);
-           FileHeader fhdr = new FileHeader(TXNLOG_MAGIC,VERSION, dbId); // 序列化
-           fhdr.serialize(oa, "fileheader");
+           FileHeader fhdr = new FileHeader(TXNLOG_MAGIC,VERSION, dbId);
+           fhdr.serialize(oa, "fileheader"); // 序列化
            // Make sure that the magic number is written before padding.
            logStream.flush(); // 刷新到磁盘
            currentSize = fos.getChannel().position(); // 当前通道的大小

@@ -289,15 +289,15 @@ public class DataTree {
 
     static public void copyStat(Stat from, Stat to) {
         to.setAversion(from.getAversion());
-        to.setCtime(from.getCtime());
+        to.setCtime(from.getCtime()); // 创建节点的时间
         to.setCversion(from.getCversion());
-        to.setCzxid(from.getCzxid());
-        to.setMtime(from.getMtime());
-        to.setMzxid(from.getMzxid());
+        to.setCzxid(from.getCzxid()); // 创建节点时的ZXID
+        to.setMtime(from.getMtime()); // 最近一次节点更新的时间
+        to.setMzxid(from.getMzxid()); // 节点最新一次更新发生时的zxid
         to.setPzxid(from.getPzxid());
-        to.setVersion(from.getVersion());
-        to.setEphemeralOwner(from.getEphemeralOwner());
-        to.setDataLength(from.getDataLength());
+        to.setVersion(from.getVersion()); // 子节点更新次数
+        to.setEphemeralOwner(from.getEphemeralOwner()); // 如果节点为ephemeral节点则该值为sessionid，否则为0
+        to.setDataLength(from.getDataLength()); // 该节点数据的长度
         to.setNumChildren(from.getNumChildren());
     }
 
