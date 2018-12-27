@@ -158,16 +158,16 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
     private ChangeRecord getRecordForPath(String path) throws KeeperException.NoNodeException {
         ChangeRecord lastChange = null;
         synchronized (zks.outstandingChanges) {
-            lastChange = zks.outstandingChangesForPath.get(path);
-            if (lastChange == null) {
+            lastChange = zks.outstandingChangesForPath.get(path); // 先从outstandingChangesForPath队列中获取
+            if (lastChange == null) { // 若在outstandingChangesForPath中未获取到，则从数据库中获取
                 DataNode n = zks.getZKDatabase().getNode(path);
-                if (n != null) {
+                if (n != null) { // 节点存在
                     Set<String> children;
                     synchronized(n) {
                         children = n.getChildren();
                     }
                     lastChange = new ChangeRecord(-1, path, n.stat, children.size(),
-                            zks.getZKDatabase().aclForNode(n));
+                            zks.getZKDatabase().aclForNode(n)); // 新生ChangeRecord
                 }
             }
         }
@@ -1004,7 +1004,7 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
     }
 
     public void processRequest(Request request) {
-        submittedRequests.add(request);
+        submittedRequests.add(request); // 将请求添加至队列中
     }
 
     public void shutdown() {
